@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{A1B2C3D4-1111-2222-3333-444455556666}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>OmrXmlBuilder</RootNamespace>
+    <AssemblyName>OmrXmlBuilder</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- Icon of the exe itself in Explorer / the taskbar shortcut.
+         Regenerate with: powershell -File tools\MakeAppIcon.ps1 -->
+    <ApplicationIcon>app.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="zxing">
+      <HintPath>libs\zxing.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="Models.cs" />
+    <Compile Include="GridDetector.cs" />
+    <Compile Include="Icons.cs" />
+    <Compile Include="XmlConfigBuilder.cs" />
+    <Compile Include="ConfigReader.cs" />
+    <Compile Include="OmrReader.cs" />
+    <Compile Include="CheckOmrForm.cs" />
+    <Compile Include="MainForm.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="tools\MakeAppIcon.ps1" />
+    <!-- Second copy, embedded in the assembly: Icons.App reads it back so every
+         window gets the whole multi-size set, not one rescaled bitmap. -->
+    <EmbeddedResource Include="app.ico" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- What counts as "the code changed" for the auto version bump below.
+       AssemblyInfo.cs is deliberately NOT in this list: the bump rewrites it,
+       and it would then look changed on every following build. -->
+  <ItemGroup>
+    <VersionBumpInput Include="@(Compile)" Exclude="Properties\AssemblyInfo.cs" />
+    <VersionBumpInput Include="app.ico;App.config" />
+  </ItemGroup>
+  <PropertyGroup>
+    <VersionBumpStamp>$(BaseIntermediateOutputPath)$(Configuration)\version.bumped</VersionBumpStamp>
+  </PropertyGroup>
+  <!-- Release build with changed sources => raise the patch number BEFORE the
+       compiler reads AssemblyInfo, so the new version is inside the exe that
+       StampVersionedExe then copies. Inputs/Outputs is what keeps a rebuild of
+       unchanged code from burning a version; Debug builds never bump. -->
+  <Target Name="BumpVersion" BeforeTargets="BeforeCompile" Condition=" '$(Configuration)' == 'Release' " Inputs="@(VersionBumpInput)" Outputs="$(VersionBumpStamp)">
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(ProjectDir)tools\BumpVersion.ps1&quot; -AssemblyInfo &quot;$(ProjectDir)Properties\AssemblyInfo.cs&quot; -Part patch" />
+    <MakeDir Directories="$([System.IO.Path]::GetDirectoryName('$(VersionBumpStamp)'))" />
+    <Touch Files="$(VersionBumpStamp)" AlwaysCreate="true" />
+  </Target>
+  <!-- After each Release build, keep a version-stamped copy so old builds are never
+       lost. The version comes from AssemblyInfo (read off the freshly built exe),
+       which BumpVersion has already raised if any source changed.
+       Release only: a Debug build would otherwise drop its unoptimised exe on top
+       of an already-released file of the same version. -->
+  <Target Name="StampVersionedExe" AfterTargets="Build" Condition=" '$(Configuration)' == 'Release' ">
+    <GetAssemblyIdentity AssemblyFiles="$(TargetPath)">
+      <Output TaskParameter="Assemblies" ItemName="BuiltAsm" />
+    </GetAssemblyIdentity>
+    <PropertyGroup>
+      <RelVer>$([System.Version]::Parse('%(BuiltAsm.Version)').ToString(3))</RelVer>
+      <RelDir>$(ProjectDir)releases\</RelDir>
+    </PropertyGroup>
+    <MakeDir Directories="$(RelDir)" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFiles="$(RelDir)OmrXmlBuilder_v$(RelVer).exe" OverwriteReadOnlyFiles="true" />
+    <Copy SourceFiles="$(ProjectDir)libs\zxing.dll" DestinationFiles="$(RelDir)zxing.dll" OverwriteReadOnlyFiles="true" Condition="Exists('$(ProjectDir)libs\zxing.dll')" />
+    <Message Importance="high" Text="Versioned copy: $(RelDir)OmrXmlBuilder_v$(RelVer).exe" />
+  </Target>
+</Project>

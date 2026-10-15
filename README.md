@@ -4,6 +4,10 @@ A Windows desktop tool for visually designing **OMR sheet configuration XML**. O
 
 > বাংলা: OMR sheet-এর ছবি খুলে click করে element বসিয়ে config XML তৈরি করার Windows tool।
 
+## Demo
+
+![OMR XML Builder demo](docs/demo.gif)
+
 ## Screenshots
 
 ![Designer with a sheet loaded](docs/screenshot-designer.png)
@@ -96,4 +100,5 @@ powershell -File tools\BumpVersion.ps1 -Part minor
 | `libs/zxing.dll` | Barcode / QR decoding (ZXing.Net) |
 
 See [CHANGELOG.md](CHANGELOG.md) for version history.
+
 

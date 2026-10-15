@@ -4,6 +4,43 @@ A Windows desktop tool for visually designing **OMR sheet configuration XML**. O
 
 > বাংলা: OMR sheet-এর ছবি খুলে click করে element বসিয়ে config XML তৈরি করার Windows tool।
 
+## Screenshots
+
+![Designer with a sheet loaded](docs/screenshot-designer.png)
+
+![Empty start screen](docs/screenshot-empty.png)
+
+## Quick start
+
+1. **Image** - open the scanned OMR sheet (the grid is detected automatically).
+2. Fill in **Design Settings** (page name, designFor, gridX / gridY, blackPixelPercent).
+3. Click an element button on the right (e.g. *MCQ Answer*), then click the sheet where it belongs.
+4. Drag / resize / nudge until the overlay matches the sheet; use **Check** to test reading.
+5. **Generate** - copy or save the config XML.
+
+## Toolbar reference
+
+| Button | What it does |
+|---|---|
+| **Image** | Open one or more OMR sheet images; each becomes its own page (double-click an empty canvas also works). |
+| **XML** | Open an existing config XML in the designer for editing. |
+| **Detect** | Re-detect the grid from corner markers / timing marks. |
+| **180°** | Turn the active sheet upside down; grid and mapping stay unchanged (press again to undo). |
+| **Deskew** | Straighten a slanted scan by measuring the corner markers, then re-detect the grid. |
+| **A-Skew** | Toggle: automatically fix skew whenever an image is opened. |
+| **A-Rot** | Toggle: place elements from whichever rotation marker (Top / Bottom) has ink. |
+| **Undo** | Undo the last change (move, resize, add, remove, property edit), Ctrl+Z. |
+| **Grid** | Show or hide the red detected-grid lines. |
+| **Zoom in / out** | Zoom the selected sheet(s); the mouse wheel works too, Ctrl+click selects several. |
+| **Fit** | Fit all sheets into the window. |
+| **Generate** | Build the config XML from the current layout to view, copy or save. |
+| **Check** | Open the current image + XML in the reader and show what is detected (magenta = reading area, green = marked). |
+| **Reset** | Clear all images, pages and elements and start a new project (asks first). |
+| **?** | About and a list of mouse / keyboard tips. |
+
+## Shortcuts
+
+`Ctrl+Z` undo · `Ctrl+D` duplicate · `Ctrl+L` lock / unlock · arrow keys nudge 0.1 cell (`Shift` = 0.5) · double-click an element to flip direction x/y · wheel to zoom.
 ## Features
 
 **Designer**
@@ -59,3 +96,4 @@ powershell -File tools\BumpVersion.ps1 -Part minor
 | `libs/zxing.dll` | Barcode / QR decoding (ZXing.Net) |
 
 See [CHANGELOG.md](CHANGELOG.md) for version history.
+
